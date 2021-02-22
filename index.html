@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Images Carousel</title>
+    <script
+      src="https://kit.fontawesome.com/25bc89a4e6.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div id="frame">
+      <div class="buttons">
+        <i class="button fas fa-arrow-left" value="Left"></i>
+        <i class="button fas fa-arrow-right" value="Right"></i>
+      </div>
+      <div class="statusBar"></div>
+    </div>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        font-size: 100%;
+        user-select: none;
+      }
+
+      #frame {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: grey;
+      }
+
+      .buttons {
+        width: 100%;
+        margin: auto;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .button {
+        margin: auto 40px;
+        padding: 40px;
+        font-size: 40px; /* Bigger font size = bigger circle size*/
+        z-index: 2;
+        text-shadow: 0px 0px 5px black;
+        color: white;
+      }
+
+      .button:hover {
+        color: #f36da1;
+      }
+
+      .button:active {
+        color: #ff0062;
+      }
+
+      img {
+        top: 50%;
+        left: 50%;
+        width: 100vw;
+        position: fixed;
+        object-fit: contain;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 200ms ease-in-out 0.1s;
+      }
+
+      .statusBar {
+        width: 80%;
+        margin: 0 auto;
+        margin: 50px auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+      }
+
+      .statusContainer {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        color: white;
+      }
+
+      .statusContainer:hover {
+        color: #f3badd;
+      }
+
+      #active {
+        color: #e08ec1;
+      }
+
+      #visible {
+        transition: opacity 800ms ease-in-out 0.1s;
+        opacity: 1;
+      }
+    </style>
+
+    <script>
+      /* Create folder imgs*/
+      /* Download images 1980*1080*/
+      /* Total number of images 15*/
+      /* Name images starting from 0.jpg*/
+      /* Choose high quality images and please don't violate copyright */
+
+      let pageLoad = function () {
+        imageLoad();
+        buttonDOM();
+        timer();
+      };
+
+      let imageLoad = function () {
+        const frame = document.querySelector("#frame");
+        const statusBar = document.querySelector(".statusBar");
+
+        for (let i = 0; i < 15; i++) {
+          let images = document.createElement("img");
+          images.setAttribute("class", `img-${i}`);
+          images.src = `./imgs/${i}.jpg`;
+          frame.appendChild(images);
+
+          statusBar.appendChild(createStatus(i));
+        }
+        document.querySelector(".img-0").setAttribute("id", "visible");
+        document.querySelector(".s-0").setAttribute("id", "active");
+      };
+
+      /* In total will be 15 circles, size and show time you can adjust in CSS*/
+      let createStatus = function (i) {
+        let container = document.createElement("i");
+        container.classList.add("statusContainer");
+        container.classList.add("fas");
+        container.classList.add("fa-circle");
+        container.classList.add(`s-${i}`);
+        container.setAttribute("value", i);
+        return container;
+      };
+
+      let buttonDOM = function () {
+        const buttons = document.querySelectorAll(".button");
+        buttons.forEach((button) =>
+          button.addEventListener("click", imageClick)
+        );
+        window.addEventListener("keydown", keyPress);
+        const statuses = document.querySelectorAll(".statusContainer");
+        statuses.forEach((status) =>
+          status.addEventListener("click", statusClick)
+        );
+      };
+
+      let keyPress = function (e) {
+        const direction = e.keyCode.toString();
+        let currentImage = document.getElementById("visible");
+        let imageNumber = currentImage.getAttribute("class").split("-")[1];
+        if (direction == "37" || direction == "39") {
+          let nextImageNumber = nextNumber(imageNumber, direction);
+          nextImage(nextImageNumber);
+        }
+      };
+
+      let statusClick = function (e) {
+        let imageNumber = e.target.getAttribute("value");
+        console.log(imageNumber);
+        nextImage(imageNumber);
+      };
+
+      let imageClick = function (e) {
+        const direction = e.target.getAttribute("value");
+        let currentImage = document.getElementById("visible");
+        let imageNumber = currentImage.getAttribute("class").split("-")[1];
+        let nextImageNumber = nextNumber(imageNumber, direction);
+        nextImage(nextImageNumber);
+      };
+
+      /* Button navigation*/
+      let nextNumber = function (imageNumber, direction) {
+        let adder;
+        switch (direction) {
+          case "Left":
+            adder = -1;
+            break;
+          case "Right":
+            adder = 1;
+            break;
+          case "37":
+            adder = -1;
+            break;
+          case "39":
+            adder = 1;
+        }
+        return (
+          (parseInt(imageNumber) + adder + 15) % 15
+        ); /* Here you cn change number of images*/
+      };
+
+      let nextImage = function (nextImageNumber) {
+        let currentImage = document.getElementById("visible");
+        let currentStatus = document.getElementById("active");
+
+        currentImage.removeAttribute("id", "visible");
+        currentStatus.removeAttribute("id", "active");
+
+        const nextImage = document.querySelector(`.img-${nextImageNumber}`);
+        nextImage.setAttribute("id", "visible");
+        const nextStatus = document.querySelector(`.s-${nextImageNumber}`);
+        nextStatus.setAttribute("id", "active");
+      };
+
+      let timer = function () {
+        setInterval(function () {
+          let currentImage = document.getElementById("visible");
+          let imageNumber = currentImage.getAttribute("class").split("-")[1];
+          let nextImageNumber = nextNumber(imageNumber, "39");
+          nextImage(nextImageNumber);
+        }, 5000);
+      };
+
+      pageLoad();
+    </script>
+  </body>
+</html>
